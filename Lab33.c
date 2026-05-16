@@ -19,15 +19,18 @@ int main(void) {
 
     inFile = fopen("input.txt", "r");
     if (!inFile) {
-        printf("Ошибка: не удалось открыть файл input.txt\n");
+        printf("Ошибка не удалось открыть файл input.txt\n");
         return 1;
     }
-
+    
+    
+    
     if (fscanf(inFile, "%d", &n) != 1 || n <= 0) {
-        printf("Ошибка: неверный формат количества людей в файле.\n");
+        printf("Неверный формат людей в файле.\n");
         fclose(inFile);
         return 1;
     }
+
 
 
     source = (struct humen*)malloc(n * sizeof(struct humen));
@@ -38,9 +41,8 @@ int main(void) {
     }
 
     for (i = 0; i < n; i++) {
-
         if (fscanf(inFile, "%49s %49s %d", source[i].name, source[i].surname, &source[i].birth_year) != 3) {
-            printf("Ошибка: недостаточно данных в файле или неверный формат на строке %d.\n", i + 2);
+            printf("Ошибка недостаточно данных в строке %d.\n", i + 2);
             free(source);
             fclose(inFile);
             return 1;
@@ -53,7 +55,7 @@ int main(void) {
 
     for (i = 0; i < n - 1; i++) {
         for (j = 0; j < n - i - 1; j++) {
-            if (source[j].birth_year < source[j + 1].birth_year) {
+            if (source[j].birth_year > source[j + 1].birth_year) {
                 temp = source[j];
                 source[j] = source[j + 1];
                 source[j + 1] = temp;
@@ -63,22 +65,19 @@ int main(void) {
 
     outFile = fopen("output.txt", "w");
     if (!outFile) {
-        printf("Ошибка: не удалось создать файл output.txt\n");
+        printf("Не удалось сохдать файл output.txt\n");
         free(source);
         return 1;
     }
 
 
-    fprintf(outFile, "--- Отсортированный список ---\n");
+    fprintf(outFile, "--- Отсартированный список ---\n");
     for (i = 0; i < n; i++) {
-        fprintf(outFile, "%s %s, год рождения: %d\n", source[i].name, source[i].surname, source[i].birth_year);
+        printf( "%s %s, год рождения : %d\n", source[i].name, source[i].surname, source[i].birth_year);
     }
 
 
     fclose(outFile);
     free(source);
-
-    printf("Данные успешно прочитаны из input.txt и сохранены в output.txt\n");
     return 0;
 }
-
