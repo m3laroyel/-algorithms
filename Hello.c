@@ -10,27 +10,27 @@
 
 #define GET_AVG(arr, n, avg) do { \
     int sum = 0; \
-    int _i; \
-    for (_i = 0; _i < n; _i++) { \
-        sum += arr[_i]; \
+    int j; \
+    for (j = 0; j < n; j++) { \
+        sum += arr[j]; \
     } \
     avg = (double)sum / n; \
 } while (0)
 
 int main() {
-    setlocale(LC_ALL, "Russian");
-    int arr[] = {12, 5, 89, 3, 45, 67};
+	setlocale(LC_ALL,"Russian");
+    int arr[] = {112, 25, 109, 43, 4, 47};
     int n = sizeof(arr) / sizeof(arr[0]);
     int max_val;
-    int i;
+    int i; 
     double average;
-    int _i;  // переменная для цикла в GET_AVG
+    int j;  
 
     GET_MAX(arr, n, max_val, i);
     GET_AVG(arr, n, average);
 
-    printf("Максимальное число: %d\n", max_val);
-    printf("Среднее арифметическое: %.2f\n", average);
+    printf("Ìàêñèìàëüíîå ÷èñëî: %d\n", max_val);
+    printf("Ñðåäíåå àðèôìèòè÷åñêîå: %2.f", average);
 
     return 0;
 }
