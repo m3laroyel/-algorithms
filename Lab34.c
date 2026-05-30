@@ -1,39 +1,56 @@
 #include <stdio.h>
-#include <locale.h>
+#include <stdlib.h>
+#include <string.h>
 
-#define GET_MAX(arr, n, max_val, i) do { \
-    max_val = arr[0]; \
-    for (i = 1; i < n; i++) { \
-        if (arr[i] > max_val) max_val = arr[i]; \
-    } \
-} while (0)
+int main(void) {
+    char expr[256];
+    char tokens[50][50];
+    char delimiters[] = " ";
+    char *token;
+    int token_count = 0;
 
-int main() {
-    setlocale(LC_ALL, "Russian");
-    
-    int n;
-    printf("Введите количество чисел: ");
-    scanf("%d", &n);
-    
-    if (n <= 0) {
-        printf("Ошибка: количество чисел должно быть больше 0\n");
-        return 1;
+    printf("enter expression: ");
+    fgets(expr, sizeof(expr), stdin);
+    expr[strcspn(expr, "\n")] = 0; // Удаляем символ переноса строки
+
+    token = strtok(expr, delimiters);
+    while (token != NULL) {
+        strcpy(tokens[token_count++], token);
+        token = strtok(NULL, delimiters);
     }
-    
-    int arr[n];  // массив переменного размера (VLA)
-    
-    printf("Введите %d чисел:\n", n);
-    for (int i = 0; i < n; i++) {
-        printf("Число %d: ", i + 1);
-        scanf("%d", &arr[i]);
+
+    if (token_count == 0) return 0;
+
+    // Массив для хранения промежуточных результатов (стек для чисел)
+    double stack[50];
+    int top = -1;
+
+    // Сначала обрабатываем первое число
+    stack[++top] = atof(tokens[0]);
+
+    // Обработка операций
+    for (int i = 1; i < token_count; i += 2) {
+        char *op = tokens[i];
+        double next_val = atof(tokens[i + 1]);
+
+        if (strcmp(op, "*") == 0) {
+            stack[top] *= next_val;
+        } else if (strcmp(op, "/") == 0) {
+            stack[top] /= next_val;
+        } else if (strcmp(op, "+") == 0) {
+            stack[++top] = next_val;
+        } else if (strcmp(op, "-") == 0) {
+            stack[++top] = -next_val;
+        }
     }
-    
-    int max_val;
-    int i;  // переменная для макроса
-    
-    GET_MAX(arr, n, max_val, i);
-    
-    printf("Максимальное число: %d\n", max_val);
-    
+
+    // Суммируем всё, что осталось в стеке
+    double result = 0.0;
+    for (int i = 0; i <= top; i++) {
+        result += stack[i];
+    }
+
+    printf("result: %g\n", result);
+
     return 0;
 }
