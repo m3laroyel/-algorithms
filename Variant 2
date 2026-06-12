@@ -1,1 +1,159 @@
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+int main() {
+    /* --- ОБЪЯВЛЕНИЕ ВСЕХ ПЕРЕМЕННЫХ (для старых компиляторов) --- */
+    FILE *f_in;
+    FILE *f_out;
+    
+    int n, m;
+    int i, j;
+    int num;
+    int count;
+    int rows;
+    
+    int *vector;
+    int **matrix;
+    int *row_sums;
+    int *col_sums;
+    
+    clock_t start_time, end_time;
+    double cpu_time_used;
+
+    /* --- НАЧАЛО ЗАМЕРА ВРЕМЕНИ --- */
+    start_time = clock();
+
+    /* --- ПОДГОТОВКА: Ввод параметров и генерация файла --- */
+    printf("Введите количество случайных чисел (N): ");
+    if (scanf("%d", &n) != 1 || n <= 0) {
+        printf("Некорректное значение N\n");
+        return 1;
+    }
+
+    printf("Введите количество столбцов матрицы (M): ");
+    if (scanf("%d", &m) != 1 || m <= 0) {
+        printf("Некорректное значение M\n");
+        return 1;
+    }
+
+    /* Создаем input.txt и пишем туда N случайных чисел */
+    f_in = fopen("input.txt", "w");
+    if (f_in == NULL) {
+        printf("Ошибка создания input.txt\n");
+        return 1;
+    }
+
+    srand((unsigned int)time(NULL));
+    for (i = 0; i < n; i++) {
+        num = rand() % 100 + 1; /* Числа от 1 до 100 */
+        fprintf(f_in, "%d ", num);
+    }
+    fclose(f_in); /* Закрываем после записи */
+
+
+    /* --- ЗАДАЧА 1: Чтение из input.txt и замена чисел на слова в output.txt --- */
+    f_in = fopen("input.txt", "r");
+    f_out = fopen("output.txt", "w");
+
+    if (f_in == NULL || f_out == NULL) {
+        printf("Ошибка открытия файлов в Задаче 1\n");
+        return 1;
+    }
+
+    /* Читаем числа по одному до конца файла */
+    while (fscanf(f_in, "%d", &num) == 1) {
+        if (num % 5 == 0 && num % 7 == 0) {
+            fprintf(f_out, "ПЯТЬСЕМЬ ");
+        } else if (num % 5 == 0) {
+            fprintf(f_out, "ПЯТЬ ");
+        } else if (num % 7 == 0) {
+            fprintf(f_out, "СЕМЬ ");
+        } else {
+            fprintf(f_out, "%d ", num);
+        }
+    }
+    fclose(f_in);
+    fclose(f_out);
+
+
+    /* --- ЗАДАЧА 2: Считывание в динамический массив и создание матрицы --- */
+    f_in = fopen("input.txt", "r");
+    if (f_in == NULL) {
+        printf("Ошибка открытия input.txt в Задаче 2\n");
+        return 1;
+    }
+
+    /* Выделяем память под временный вектор для N элементов */
+    vector = (int *)malloc(n * sizeof(int));
+    count = 0;
+    while (count < n && fscanf(f_in, "%d", &vector[count]) == 1) {
+        count++;
+    }
+    fclose(f_in);
+
+    /* Считаем, сколько полных строк по M элементов получится */
+    rows = count / m;
+    if (rows == 0) {
+        printf("\nОшибка: Недостаточно чисел для создания матрицы с %d столбцами!\n", m);
+        free(vector);
+        return 1;
+    }
+
+    /* Выделяем память под строки матрицы (массив указателей) */
+    matrix = (int **)malloc(rows * sizeof(int *));
+    for (i = 0; i < rows; i++) {
+        matrix[i] = (int *)malloc(m * sizeof(int));
+    }
+
+    /* Выделяем память под массивы для сумм (зануляем через calloc) */
+    row_sums = (int *)calloc(rows, sizeof(int));
+    col_sums = (int *)calloc(m, sizeof(int));
+
+    /* Переносим данные из одномерного вектора в матрицу и считаем суммы */
+    for (i = 0; i < rows; i++) {
+        for (j = 0; j < m; j++) {
+            matrix[i][j] = vector[i * m + j]; /* Формула пересчета индекса */
+            row_sums[i] += matrix[i][j];       /* Сумма по строке i */
+            col_sums[j] += matrix[i][j];       /* Сумма по столбцу j */
+        }
+    }
+
+    /* Выводим матрицу и суммы строк на экран */
+    printf("\n--- Матрица (%d x %d) и суммы строк ---\n", rows, m);
+    for (i = 0; i < rows; i++) {
+        for (j = 0; j < m; j++) {
+            printf("%4d ", matrix[i][j]);
+        }
+        printf("| Сумма строки: %d\n", row_sums[i]);
+    }
+
+    /* Выводим разделитель и суммы столбцов */
+    for (j = 0; j < m; j++) {
+        printf("----");
+    }
+    printf("\n");
+    for (j = 0; j < m; j++) {
+        printf("%4d ", col_sums[j]);
+    }
+    printf("  (Суммы столбцов)\n\n");
+
+
+    /* --- ОЧИСТКА ПАМЯТИ (Очистить массивы по условию) --- */
+    free(row_sums);
+    free(col_sums);
+    for (i = 0; i < rows; i++) {
+        free(matrix[i]);
+    }
+    free(matrix);
+    free(vector);
+
+
+    /* --- КОНЕЦ ЗАМЕРА ВРЕМЕНИ И ВЫВОД --- */
+    end_time = clock();
+    cpu_time_used = ((double)(end_time - start_time)) / CLOCKS_PER_SEC;
+    printf("Время работы всей программы: %f секунд.\n", cpu_time_used);
+
+    return 0;
+}
