@@ -1,0 +1,156 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+int main(void) {
+    clock_t start, end;
+    FILE *f;
+    
+    /* Размер матриц n на n */
+    int n;
+    
+    /* Указатели для динамических массивов */
+    int **A = NULL;
+    int **B = NULL;
+    int **C = NULL;
+    
+    /* Индексы для циклов */
+    int i, j, k;
+
+    /* Включаем таймер */
+    start = clock();
+
+    /* =======================================================
+       ШАГ 1: Ввод размера, выделение памяти и ввод элементов
+       ======================================================= */
+    printf("Enter matrix size (n): ");
+    scanf("%d", &n);
+
+    /* Выделяем память под матрицу А (размер n x n) */
+    A = (int**)malloc(n * sizeof(int*));
+    for (i = 0; i < n; i++) {
+        A[i] = (int*)malloc(n * sizeof(int));
+    }
+
+    printf("Enter elements for Matrix 1:\n");
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < n; j++) {
+            printf("A[%d][%d] = ", i, j);
+            scanf("%d", &A[i][j]);
+        }
+    }
+
+    /* Выделяем память под матрицу В (размер n x n) */
+    B = (int**)malloc(n * sizeof(int*));
+    for (i = 0; i < n; i++) {
+        B[i] = (int*)malloc(n * sizeof(int));
+    }
+
+    printf("Enter elements for Matrix 2:\n");
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < n; j++) {
+            printf("B[%d][%d] = ", i, j);
+            scanf("%d", &B[i][j]);
+        }
+    }
+
+    /* Записываем размер и обе матрицы в файл input.txt */
+    f = fopen("input.txt", "w");
+    if (f != NULL) {
+        fprintf(f, "%d\n", n); /* Записываем n один раз */
+        
+        for (i = 0; i < n; i++) {
+            for (j = 0; j < n; j++) fprintf(f, "%d ", A[i][j]);
+            fprintf(f, "\n");
+        }
+        for (i = 0; i < n; i++) {
+            for (j = 0; j < n; j++) fprintf(f, "%d ", B[i][j]);
+            fprintf(f, "\n");
+        }
+        fclose(f);
+    }
+
+    /* ТРЕБОВАНИЕ ЗАДАНИЯ: Закрыть файл. Отчистить массивы. */
+    for (i = 0; i < n; i++) free(A[i]);
+    free(A);
+    for (i = 0; i < n; i++) free(B[i]);
+    free(B);
+    printf("\n[Step 1 done] File closed. Memory cleared.\n");
+
+
+    /* =======================================================
+       ШАГ 2: Чтение из файла и вычисления
+       ======================================================= */
+    f = fopen("input.txt", "r");
+    if (f == NULL) return 1;
+
+    /* Считываем n из файла и выделяем память заново */
+    fscanf(f, "%d", &n);
+
+    A = (int**)malloc(n * sizeof(int*));
+    for (i = 0; i < n; i++) A[i] = (int*)malloc(n * sizeof(int));
+
+    B = (int**)malloc(n * sizeof(int*));
+    for (i = 0; i < n; i++) B[i] = (int*)malloc(n * sizeof(int));
+
+    /* Читаем матрицу А */
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < n; j++) fscanf(f, "%d", &A[i][j]);
+    }
+
+    /* Читаем матрицу В */
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < n; j++) fscanf(f, "%d", &B[i][j]);
+    }
+    fclose(f);
+
+    /* Открываем output.txt для результатов */
+    f = fopen("output.txt", "w");
+    if (f == NULL) return 1;
+
+    /* Выделяем память под результирующую матрицу С */
+    C = (int**)malloc(n * sizeof(int*));
+    for (i = 0; i < n; i++) C[i] = (int*)malloc(n * sizeof(int));
+
+    /* Сложение (A + B) */
+    fprintf(f, "Addition result:\n");
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < n; j++) {
+            C[i][j] = A[i][j] + B[i][j];
+            fprintf(f, "%d ", C[i][j]);
+        }
+        fprintf(f, "\n");
+    }
+
+    /* Умножение (A * B) */
+    fprintf(f, "\nMultiplication result:\n");
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < n; j++) {
+            C[i][j] = 0;
+            for (k = 0; k < n; k++) {
+                C[i][j] += A[i][k] * B[k][j];
+            }
+            fprintf(f, "%d ", C[i][j]);
+        }
+        fprintf(f, "\n");
+    }
+
+    fclose(f);
+
+    /* Полная очистка всей оставшейся памяти */
+    for (i = 0; i < n; i++) free(A[i]);
+    free(A);
+    for (i = 0; i < n; i++) free(B[i]);
+    free(B);
+    for (i = 0; i < n; i++) free(C[i]);
+    free(C);
+
+    /* =======================================================
+       ШАГ 3: Замер времени
+       ======================================================= */
+    end = clock();
+    printf("Results successfully saved to output.txt\n");
+    printf("Execution time: %f seconds\n", (double)(end - start) / CLOCKS_PER_SEC);
+
+    return 0;
+}
