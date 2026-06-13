@@ -11,8 +11,7 @@ int main() {
 	printf("enter quantity of numbers: ");
 	scanf("%d", &n);
 	
-	printf("enter quantity of column: ");
-	scanf("%d", &m);
+	m = sqrt(n);
 	
 	f1 = fopen("input.txt", "w");
 	srand(time(NULL));
